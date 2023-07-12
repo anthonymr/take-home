@@ -16,24 +16,27 @@ export class Drug {
   DRUGS() {
     return {
       "Herbal Tea": {
+        ... this.GENERIC_DRUG(),
         benefitChangeRate: () => this.expired() ? 2 : 1,
-        expires: true,
-        nonBenefitOnExpiration: false,
       },
       "Fervex": {
+        ... this.GENERIC_DRUG(),
         benefitChangeRate: () => {
           if(this.expired()) return 0;
           if(this.expiresIn < 5) return 3;
           if(this.expiresIn < 10) return 2;
           return 1;
         },
-        expires: true,
         nonBenefitOnExpiration: true,
       },
       "Magic Pill": {
+        ... this.GENERIC_DRUG(),
         benefitChangeRate: () => 0,
         expires: false,
-        nonBenefitOnExpiration: false,
+      },
+      "Dafalgan": {
+        ... this.GENERIC_DRUG(),
+        benefitChangeRate: () => this.expired() ? -4 : -2,
       },
     }
   }
