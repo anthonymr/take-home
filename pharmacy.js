@@ -5,49 +5,58 @@ export class Drug {
     this.benefit = benefit;
   }
 
-  doesThisExpire() {
-    const drugsThatNotExpire = [
-      "Magic Pill"
-    ];
-
-    return !drugsThatNotExpire.includes(this.name);
-  }
-
-  expired() {
-    return this.doesThisExpire() && this.expiresIn < 0;
-  }
-
-  noBenefit() {
-    if(this.name === "Fervex") return this.expiresIn < 0;
-  }
-
-  expirationRate() {
-    switch (this.name) {
-      case "Herbal Tea":
-        return this.expired() ? 2 : 1;
-      case "Fervex":
-        if(this.expired()) return 0;
-        if(this.expiresIn < 5) return 3;
-        if(this.expiresIn < 10) return 2;
-        return 1;
-      case "Magic Pill":
-        return 0;
-      default:
-        return this.expired() ? -2 : -1;
+  GENERIC_DRUG() {
+    return {
+      benefitChangeRate: () => this.expired() ? -2 : -1,
+      expires: true,
+      nonBenefitOnExpiration: false,
     }
   }
 
+  DRUGS() {
+    return {
+      "Herbal Tea": {
+        benefitChangeRate: () => this.expired() ? 2 : 1,
+        expires: true,
+        nonBenefitOnExpiration: false,
+      },
+      "Fervex": {
+        benefitChangeRate: () => {
+          if(this.expired()) return 0;
+          if(this.expiresIn < 5) return 3;
+          if(this.expiresIn < 10) return 2;
+          return 1;
+        },
+        expires: true,
+        nonBenefitOnExpiration: true,
+      },
+      "Magic Pill": {
+        benefitChangeRate: () => 0,
+        expires: false,
+        nonBenefitOnExpiration: false,
+      },
+    }
+  }
+  
+  drug() {
+    return this.DRUGS()[this.name] || this.GENERIC_DRUG();
+  }
+
+  expired() {
+    return this.drug().expires && this.expiresIn < 0;
+  }
+
   updateExpiresIn() {
-    if(this.doesThisExpire()) {
+    if(this.drug().expires) {
       this.expiresIn -= 1;
     }
   }
 
   updateBenefitValue() {
-    this.benefit += this.expirationRate();
+    this.benefit += this.drug().benefitChangeRate();
     if(this.benefit > 50) this.benefit = 50;
     if(this.benefit < 0) this.benefit = 0;
-    if(this.noBenefit() && this.expired()) this.benefit = 0;
+    if(this.drug().nonBenefitOnExpiration && this.expired()) this.benefit = 0;
   }
 }
 
